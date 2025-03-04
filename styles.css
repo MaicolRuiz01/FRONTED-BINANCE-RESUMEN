@@ -1,0 +1,81 @@
+/* Estilos Generales */
+body {
+    padding-top: 80px;
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar */
+.navbar-custom {
+    background-color: #212529;
+    border-bottom: 4px solid #ffc107;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #ffc107 !important;
+    font-size: 1.3rem;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+    margin-right: 10px;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffc107 !important;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(90deg, #ffc107 30%, #ffdd57 100%);
+    color: #343a40;
+    padding: 40px 0;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tarjetas de Cuentas */
+.card-custom {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    margin-bottom: 20px;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: #343a40;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-body {
+    background-color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+/* Botones */
+.btn-custom {
+    background-color: #ffc107;
+    color: #343a40;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-custom:hover {
+    background-color: #e0a800;
+    transform: scale(1.05);
+}
