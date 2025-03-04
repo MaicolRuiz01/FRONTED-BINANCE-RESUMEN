@@ -2,9 +2,11 @@ let allOrders = [];
 let currentPage = 1;
 const ordersPerPage = 10;
 
+const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
+
 async function fetchP2POrders(account) {
     try {
-        const response = await axios.get(`http://localhost:3000/api/p2p/orders`, {
+        const response = await axios.get(`${backendUrl}/api/p2p/orders`, {
             params: { account }
         });
 
@@ -28,6 +30,7 @@ async function fetchP2POrders(account) {
         alert("No se pudo cargar las órdenes P2P.");
     }
 }
+
 
 function filterOrders() {
     const startDate = document.getElementById("startDate").value;

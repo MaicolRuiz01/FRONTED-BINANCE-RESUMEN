@@ -7,9 +7,14 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchPaymentHistory(account);
 });
 
+const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
+
 async function fetchPaymentHistory(account) {
     try {
-        const response = await axios.get(`http://localhost:3000/api/payments?account=${account}`);
+        const response = await axios.get(`${backendUrl}/api/payments`, {
+            params: { account }
+        });
+
         console.log("Respuesta del backend:", response.data);
 
         if (response.data.error) {
@@ -24,6 +29,7 @@ async function fetchPaymentHistory(account) {
         alert("No se pudo cargar el historial de pagos.");
     }
 }
+
 
 
 function displayPaymentHistory(data) {
