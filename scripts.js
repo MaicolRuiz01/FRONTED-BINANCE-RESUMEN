@@ -2,8 +2,8 @@ let allOrders = [];
 let currentPage = 1;
 const ordersPerPage = 10;
 
-const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-
+// const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
+    const backendUrl = "http://localhost:8080"; 
 async function fetchP2POrders(account) {
     try {
         const response = await axios.get(`${backendUrl}/api/p2p/orders`, {
@@ -163,3 +163,128 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fetchP2POrders(account);
 });
+
+function downloadExcel() {
+    if (allOrders.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
+
+    // Crear un nuevo libro de trabajo
+    const workbook = XLSX.utils.book_new();
+    
+    // Convertir los datos de las órdenes a formato adecuado para la biblioteca
+    const worksheetData = allOrders.map(order => ({
+        Fecha: new Date(order.createTime).toLocaleString(),
+        USDT: order.amount,
+        PESOS: order.totalPrice,
+        Comisión: order.commission,
+        Tasa: order.unitPrice,
+        Estado: order.orderStatus,
+        Banco: order.payMethodName
+    }));
+
+    // Añadir los datos al libro de trabajo
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Órdenes P2P");
+
+    // Opciones para guardar el archivo
+    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+    function s2ab(s) {
+        const buffer = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buffer);
+        for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+        return buffer;
+    }
+
+    // Descargar el archivo
+    saveAs(new Blob([s2ab(wbout)], { type: "application/octet-stream" }), "OrdenesP2P.xlsx");
+}
+
+// Función para obtener el historial de posiciones de futuros
+async function fetchFuturesPositionHistory(account) {
+    try {
+        const response = await axios.get(`${backendUrl}/api/futures/positionHistory`, {
+            params: { account }
+        });
+        console.log("Historial de posiciones:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener el historial de posiciones:", error);
+        alert("Error al cargar el historial de posiciones: " + error.message);
+    }
+}
+
+// Función para obtener el historial de trades de futuros
+async function fetchFuturesTradeHistory(account) {
+    try {
+        const response = await axios.get(`${backendUrl}/api/futures/tradeHistory`, {
+            params: { account }
+        });
+        console.log("Historial de trades:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener el historial de trades:", error);
+        alert("Error al cargar el historial de trades: " + error.message);
+    }
+}
+
+// Función para obtener el historial de transacciones de futuros
+async function fetchFuturesTransactionHistory(account) {
+    try {
+        const response = await axios.get(`${backendUrl}/api/futures/transactionHistory`, {
+            params: { account }
+        });
+        console.log("Historial de transacciones:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener el historial de transacciones:", error);
+        alert("Error al cargar el historial de transacciones: " + error.message);
+    }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const account = urlParams.get('account');
+
+    // Asignar eventos a las pestañas
+    const positionsTab = document.getElementById('positions-tab');
+    const tradesTab = document.getElementById('trades-tab');
+    const transactionsTab = document.getElementById('transactions-tab');
+
+    positionsTab.addEventListener('shown.bs.tab', function (event) {
+        fetchFuturesPositionHistory(account).then(data => {
+            displayData(data, 'positions');
+        });
+    });
+
+    tradesTab.addEventListener('shown.bs.tab', function (event) {
+        fetchFuturesTradeHistory(account).then(data => {
+            displayData(data, 'trades');
+        });
+    });
+
+    transactionsTab.addEventListener('shown.bs.tab', function (event) {
+        fetchFuturesTransactionHistory(account).then(data => {
+            displayData(data, 'transactions');
+        });
+    });
+
+    // Suponiendo que deseas cargar las posiciones al cargar la página por primera vez
+    fetchFuturesPositionHistory(account).then(data => {
+        displayData(data, 'positions');
+    });
+});
+
+function displayData(data, tabId) {
+    const tabPane = document.getElementById(tabId);
+    tabPane.innerHTML = ''; // Limpiar contenido anterior
+    if (!data || data.error) {
+        tabPane.innerHTML = `<p class='text-center'>Error o sin datos disponibles.</p>`;
+        return;
+    }
+    // Aquí puedes construir la visualización de los datos según necesites
+    const content = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    tabPane.innerHTML = content;
+}
+

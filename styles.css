@@ -66,8 +66,8 @@ body {
 
 /* Botones */
 .btn-custom {
-    background-color: #ffc107;
-    color: #343a40;
+    background-color: #ffc107; /* Fondo amarillo */
+    color: #343a40;            /* Letra negra */
     border: none;
     padding: 12px 20px;
     font-size: 16px;
@@ -76,6 +76,6 @@ body {
 }
 
 .btn-custom:hover {
-    background-color: #e0a800;
+    background-color: #e0a800; /* Amarillo más oscuro al pasar el mouse */
     transform: scale(1.05);
 }

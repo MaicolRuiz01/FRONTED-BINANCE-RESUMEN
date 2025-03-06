@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchPaymentHistory(account);
 });
 
-const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-
+// const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
+    const backendUrl = "http://localhost:8080"; 
 async function fetchPaymentHistory(account) {
     try {
         const response = await axios.get(`${backendUrl}/api/payments`, {
