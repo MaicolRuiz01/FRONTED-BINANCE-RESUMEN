@@ -3,33 +3,32 @@ let currentPage = 1;
 const ordersPerPage = 10;
 
 // const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-    const backendUrl = "http://localhost:8080"; 
-async function fetchP2POrders(account) {
-    try {
-        const response = await axios.get(`${backendUrl}/api/p2p/orders`, {
-            params: { account }
-        });
+    const backendUrl = "http://localhost:3000"; 
 
-        console.log("Respuesta del backend:", response.data);
-
-        if (response.data.error) {
-            alert("Error: " + response.data.error);
-            return;
+    async function fetchP2POrders(account) {
+        try {
+            const response = await axios.get(`${backendUrl}/api/p2p/orders`, { params: { account } });
+            console.log("Respuesta del backend:", response.data);
+    
+            if (response.data.error) {
+                alert("Error: " + response.data.error);
+                return;
+            }
+    
+            if (!response.data.data || !Array.isArray(response.data.data)) {
+                console.error("Formato inesperado:", response.data);
+                alert("No se encontraron datos válidos.");
+                return;
+            }
+    
+            allOrders = response.data.data;
+            filterOrders(); // Aplicar filtro de fechas
+        } catch (error) {
+            console.error("Error al cargar órdenes P2P:", error);
+            alert("No se pudo cargar las órdenes P2P.");
         }
-
-        if (!response.data.data || !Array.isArray(response.data.data)) {
-            console.error("Formato inesperado:", response.data);
-            alert("No se encontraron datos válidos.");
-            return;
-        }
-
-        allOrders = response.data.data;
-        filterOrders(); // Aplicar filtro de fechas
-    } catch (error) {
-        console.error("Error al cargar órdenes P2P:", error);
-        alert("No se pudo cargar las órdenes P2P.");
     }
-}
+    
 
 
 function filterOrders() {
@@ -205,44 +204,58 @@ function downloadExcel() {
 // Función para obtener el historial de posiciones de futuros
 async function fetchFuturesPositionHistory(account) {
     try {
-        const response = await axios.get(`${backendUrl}/api/futures/positionHistory`, {
-            params: { account }
-        });
+        const response = await axios.get(`${backendUrl}/api/futures/positionHistory`, { params: { account } });
         console.log("Historial de posiciones:", response.data);
-        return response.data;
+
+        if (response.data.error) {
+            alert("Error al cargar el historial de posiciones: " + response.data.error);
+            return;
+        }
+
+        // Función para mostrar los datos
+        displayData(response.data, 'positions');
     } catch (error) {
         console.error("Error al obtener el historial de posiciones:", error);
         alert("Error al cargar el historial de posiciones: " + error.message);
     }
 }
 
+
 // Función para obtener el historial de trades de futuros
 async function fetchFuturesTradeHistory(account) {
     try {
-        const response = await axios.get(`${backendUrl}/api/futures/tradeHistory`, {
-            params: { account }
-        });
+        const response = await axios.get(`${backendUrl}/api/futures/tradeHistory`, { params: { account } });
         console.log("Historial de trades:", response.data);
-        return response.data;
+
+        if (response.data.error) {
+            alert("Error al cargar el historial de trades: " + response.data.error);
+            return;
+        }
+
+        displayData(response.data, 'trades');
     } catch (error) {
         console.error("Error al obtener el historial de trades:", error);
         alert("Error al cargar el historial de trades: " + error.message);
     }
 }
 
-// Función para obtener el historial de transacciones de futuros
 async function fetchFuturesTransactionHistory(account) {
     try {
-        const response = await axios.get(`${backendUrl}/api/futures/transactionHistory`, {
-            params: { account }
-        });
+        const response = await axios.get(`${backendUrl}/api/futures/transactionHistory`, { params: { account } });
         console.log("Historial de transacciones:", response.data);
-        return response.data;
+
+        if (response.data.error) {
+            alert("Error al cargar el historial de transacciones: " + response.data.error);
+            return;
+        }
+
+        displayData(response.data, 'transactions');
     } catch (error) {
         console.error("Error al obtener el historial de transacciones:", error);
         alert("Error al cargar el historial de transacciones: " + error.message);
     }
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const account = urlParams.get('account');
@@ -278,13 +291,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function displayData(data, tabId) {
     const tabPane = document.getElementById(tabId);
-    tabPane.innerHTML = ''; // Limpiar contenido anterior
+    tabPane.innerHTML = '';
+
     if (!data || data.error) {
         tabPane.innerHTML = `<p class='text-center'>Error o sin datos disponibles.</p>`;
         return;
     }
+
     // Aquí puedes construir la visualización de los datos según necesites
     const content = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
     tabPane.innerHTML = content;
 }
+
 
