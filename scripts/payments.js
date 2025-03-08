@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-    const backendUrl = "http://localhost:8080"; 
+    const backendUrl = "http://localhost:3000"; 
 async function fetchPaymentHistory(account) {
     try {
         const response = await axios.get(`${backendUrl}/api/payments`, {
