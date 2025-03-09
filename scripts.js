@@ -2,161 +2,67 @@ let allOrders = [];
 let currentPage = 1;
 const ordersPerPage = 10;
 
-const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
+// 🔥 CONFIGURACIÓN: Múltiples API Keys
+const apiKeys = {
+    "MILTON": { 
+        key: "EfBN9mFWAxk7CwsZzu37sXIGXyIQnyLVrAs3aqZOLAa3NumayunaGRQIJ6fi4U2r",
+        secret: "NbdiovuQxwgzwANxgZC669Jke5MZJUH3hyLT6BD8iWYz91EVK6e9adOY2Wq4t6nK"
+    },
+    "CESAR": { 
+        key: "Ho474mufN8vTwvrZLjj8DdZHxa88JYlCrcPHp1r7UAhwc197So9vmUG9tRhM3XNr",
+        secret: "Ns41sTlvAM3nUzD0qMPE4PW57omuSxOPKdcngudgqVPphExjJC3tWX8kcxwibXDz"
+    },
+    "MARCEL": { 
+        key: "vtNXEFCDEYxWpGGipXG210zzq5i2FnJAqmK5LJtRGiq5NRMCJqCQEOcR85SAunUP",
+        secret: "J9eIUXMxwFggHvU2HHp2EiWfNaXGvShSx5UihepHmW1gIjIBe3waZC3JvMUPBfga"
+    }
+};
+const binanceUrl = "https://api.binance.com";
 
 async function fetchP2POrders(account) {
+    if (!apiKeys[account]) {
+        alert("Cuenta no válida");
+        return;
+    }
+
+    const API_KEY = apiKeys[account].key;
+    const SECRET_KEY = apiKeys[account].secret;
+
     try {
-        const response = await axios.get(`${backendUrl}/api/p2p/orders`, {
-            params: { account }
+        const timestamp = Date.now();
+        const queryString = `tradeType=SELL&timestamp=${timestamp}&recvWindow=60000`;
+        const signature = CryptoJS.HmacSHA256(queryString, SECRET_KEY).toString(CryptoJS.enc.Hex);
+        const url = `${binanceUrl}/sapi/v1/c2c/orderMatch/listUserOrderHistory?${queryString}&signature=${signature}`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "X-MBX-APIKEY": API_KEY
+            }
         });
 
-        console.log("Respuesta del backend:", response.data);
+        const data = await response.json();
+        console.log(`Órdenes P2P (${account}):`, data);
 
-        if (response.data.error) {
-            alert("Error: " + response.data.error);
+        if (data.error) {
+            alert(`Error en ${account}: ` + data.error);
             return;
         }
 
-        if (!response.data.data || !Array.isArray(response.data.data)) {
-            console.error("Formato inesperado:", response.data);
-            alert("No se encontraron datos válidos.");
+        if (!data.data || !Array.isArray(data.data)) {
+            console.error("Formato inesperado:", data);
+            alert(`No se encontraron datos válidos para ${account}.`);
             return;
         }
 
-        allOrders = response.data.data;
+        allOrders = data.data;
         filterOrders(); // Aplicar filtro de fechas
     } catch (error) {
-        console.error("Error al cargar órdenes P2P:", error);
-        alert("No se pudo cargar las órdenes P2P.");
+        console.error(`Error al cargar órdenes P2P (${account}):`, error);
+        alert(`No se pudo cargar las órdenes P2P (${account}).`);
     }
 }
 
-
-function filterOrders() {
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-
-    if (!startDate || !endDate) {
-        alert("Por favor, selecciona ambas fechas.");
-        return;
-    }
-
-    const startTime = new Date(startDate).getTime();
-    const endTime = new Date(endDate).getTime();
-
-    const filteredOrders = allOrders.filter(order => {
-        const orderTime = order.createTime;
-        return orderTime >= startTime && orderTime <= endTime;
-    });
-
-    allOrders = filteredOrders;
-    currentPage = 1;
-    displayOrders(currentPage);
-    setupPagination();
-}
-
-function displayOrders(page) {
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
-
-    if (allOrders.length === 0) {
-        resultsDiv.innerHTML = "<p class='text-center'>No se encontraron órdenes en el rango de fechas.</p>";
-        return;
-    }
-
-    const start = (page - 1) * ordersPerPage;
-    const end = start + ordersPerPage;
-    const paginatedOrders = allOrders.slice(start, end);
-
-    const table = document.createElement("table");
-    table.className = "table table-striped table-hover";
-    const headerRow = table.insertRow();
-    headerRow.className = "table-dark";
-
-    const headers = ["Fecha", "USDT", "PESOS", "Comisión", "Tasa", "Estado", "Banco"];
-    headers.forEach(headerText => {
-        const header = document.createElement("th");
-        header.textContent = headerText;
-        headerRow.appendChild(header);
-    });
-
-    paginatedOrders.forEach(order => {
-        const row = table.insertRow();
-        ["createTime", "amount", "totalPrice", "commission", "unitPrice", "orderStatus", "payMethodName"].forEach(field => {
-            const cell = row.insertCell();
-            cell.textContent = field === 'createTime' ? new Date(order[field]).toLocaleString() : order[field] || "N/A";
-        });
-    });
-
-    resultsDiv.appendChild(table);
-}
-
-function setupPagination() {
-    const paginationDiv = document.getElementById("pagination");
-    if (!paginationDiv) {
-        console.error("El elemento 'pagination' no se encontró en el DOM.");
-        return;
-    }
-
-    paginationDiv.innerHTML = "";
-
-    const pageCount = Math.ceil(allOrders.length / ordersPerPage);
-    const maxVisiblePages = 5; // Número de páginas visibles en la paginación
-
-    if (pageCount <= 1) return; // No mostrar paginación si solo hay una página
-
-    const createPageButton = (page, text = page, isDisabled = false, isActive = false) => {
-        const button = document.createElement("button");
-        button.className = `btn mx-1 ${isActive ? "btn-primary" : "btn-outline-primary"}`;
-        button.textContent = text;
-        button.disabled = isDisabled;
-        button.onclick = () => {
-            if (!isDisabled) {
-                currentPage = page;
-                displayOrders(currentPage);
-                setupPagination();
-            }
-        };
-        return button;
-    };
-
-    // Botón de "Anterior"
-    if (currentPage > 1) {
-        paginationDiv.appendChild(createPageButton(currentPage - 1, "<"));
-    }
-
-    // Siempre mostrar la primera página
-    paginationDiv.appendChild(createPageButton(1, "1", false, currentPage === 1));
-
-    if (currentPage > maxVisiblePages) {
-        paginationDiv.appendChild(createPageButton(null, "...", true));
-    }
-
-    // Rango dinámico de páginas centrado en la página actual
-    const startPage = Math.max(2, currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(pageCount - 1, startPage + maxVisiblePages - 1);
-
-    for (let i = startPage; i <= endPage; i++) {
-        paginationDiv.appendChild(createPageButton(i, i, false, currentPage === i));
-    }
-
-    if (endPage < pageCount - 1) {
-        paginationDiv.appendChild(createPageButton(null, "...", true));
-    }
-
-    // Siempre mostrar la última página
-    if (pageCount > 1) {
-        paginationDiv.appendChild(createPageButton(pageCount, pageCount, false, currentPage === pageCount));
-    }
-
-    // Botón de "Siguiente"
-    if (currentPage < pageCount) {
-        paginationDiv.appendChild(createPageButton(currentPage + 1, ">"));
-    }
-}
-
-
-// Cargar órdenes al iniciar
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const account = urlParams.get('account');
