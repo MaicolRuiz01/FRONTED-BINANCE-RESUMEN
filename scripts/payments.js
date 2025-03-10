@@ -7,60 +7,29 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchPaymentHistory(account);
 });
 
-// 🔥 CONFIGURACIÓN: Múltiples API Keys
-const apiKeys = {
-    "MILTON": { 
-        key: "EfBN9mFWAxk7CwsZzu37sXIGXyIQnyLVrAs3aqZOLAa3NumayunaGRQIJ6fi4U2r",
-        secret: "NbdiovuQxwgzwANxgZC669Jke5MZJUH3hyLT6BD8iWYz91EVK6e9adOY2Wq4t6nK"
-    },
-    "CESAR": { 
-        key: "Ho474mufN8vTwvrZLjj8DdZHxa88JYlCrcPHp1r7UAhwc197So9vmUG9tRhM3XNr",
-        secret: "Ns41sTlvAM3nUzD0qMPE4PW57omuSxOPKdcngudgqVPphExjJC3tWX8kcxwibXDz"
-    },
-    "MARCEL": { 
-        key: "vtNXEFCDEYxWpGGipXG210zzq5i2FnJAqmK5LJtRGiq5NRMCJqCQEOcR85SAunUP",
-        secret: "J9eIUXMxwFggHvU2HHp2EiWfNaXGvShSx5UihepHmW1gIjIBe3waZC3JvMUPBfga"
-    }
-};
-const binanceUrl = "https://api.binance.com";
+// const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; //  Railway URL
+const backendUrl = "http://localhost:3000";
 
 async function fetchPaymentHistory(account) {
-    if (!apiKeys[account]) {
-        alert("Cuenta no válida");
-        return;
-    }
-
-    const API_KEY = apiKeys[account].key;
-    const SECRET_KEY = apiKeys[account].secret;
-
     try {
-        const timestamp = Date.now();
-        const queryString = `timestamp=${timestamp}&recvWindow=60000`;
+        const response = await axios.get(`${backendUrl}/api/payments/history`, { params: { account } });
+        console.log("Respuesta del backend:", response.data);
 
-        // 🔐 Generar la firma HMAC SHA256
-        const signature = CryptoJS.HmacSHA256(queryString, SECRET_KEY).toString(CryptoJS.enc.Hex);
-        const url = `${binanceUrl}/sapi/v1/pay/transactions?${queryString}&signature=${signature}`;
-
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "X-MBX-APIKEY": API_KEY
-            }
-        });
-
-        const data = await response.json();
-        console.log(`Historial de pagos (${account}):`, data);
-
-        if (data.error) {
-            alert(`Error en ${account}: ` + data.error);
-        } else if (data.data) {
-            displayPaymentHistory(data.data);
-        } else {
-            alert("Respuesta inesperada de Binance.");
+        if (response.data.error) {
+            alert("Error: " + response.data.error);
+            return;
         }
+
+        if (!response.data.data || !Array.isArray(response.data.data)) {
+            console.error("Formato inesperado:", response.data);
+            alert("No se encontraron datos válidos.");
+            return;
+        }
+
+        displayPaymentHistory(response.data.data);
     } catch (error) {
-        console.error(`Error al obtener historial de pagos (${account}):`, error);
-        alert(`No se pudo cargar el historial de pagos (${account}).`);
+        console.error("Error al cargar el historial de pagos:", error);
+        alert("No se pudo cargar el historial de pagos.");
     }
 }
 
