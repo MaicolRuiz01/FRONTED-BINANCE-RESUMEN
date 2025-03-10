@@ -3,7 +3,7 @@ let currentPage = 1;
 const ordersPerPage = 10;
 
 // const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-    const backendUrl = "https://fronted-binance-resumen-production.up.railway.app/"; 
+    const backendUrl = "https://fronted-binance-resumen-production.up.railway.app"; 
 
 
 

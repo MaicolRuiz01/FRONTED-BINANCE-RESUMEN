@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; //  Railway URL
 /* const backendUrl = "http://localhost:3000"; */
-const backendUrl = "https://fronted-binance-resumen-production.up.railway.app/";
+const backendUrl = "https://fronted-binance-resumen-production.up.railway.app";
 
 async function fetchPaymentHistory(account) {
     try {
