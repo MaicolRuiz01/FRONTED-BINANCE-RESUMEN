@@ -3,9 +3,20 @@ const router = express.Router();
 const cors = require('cors'); // Asegúrate de requerir CORS
 const binanceService = require('../service/binanceService');
 
-// Aplicar CORS a todas las rutas del router
+const allowedOrigins = [
+    'http://127.0.0.1:5501', // Local
+    'https://maicolruiz01.github.io', // GitHub Pages
+    'https://fronted-binance-resumen-production.up.railway.app', // Railway
+];
+
 router.use(cors({
-    origin: 'http://127.0.0.1:5501' // Ajusta esto según sea necesario
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Origen no permitido por CORS'));
+        }
+    },
 }));
 
 
