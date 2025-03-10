@@ -81,6 +81,7 @@ class BinanceService {
     async getFuturesPositionHistory(account) {
         const credentials = this.getApiCredentials(account);
         if (!credentials) {
+            console.error("Credenciales no válidas para la cuenta:", account);
             return JSON.stringify({ error: "Cuenta no válida." });
         }
     
@@ -90,12 +91,17 @@ class BinanceService {
         const url = `${this.futuresPositionHistoryUrl}?${query}&signature=${signature}`;
     
         try {
-            const response = await this.sendBinanceRequest(url, credentials.apiKey);
+            const config = {
+                headers: { 'X-MBX-APIKEY': credentials.apiKey }
+            };
+            const response = await axios.get(url, config);
             return response.data;
         } catch (error) {
+            console.error("Error en getFuturesPositionHistory para", account, "URL:", url, "Error:", error.response ? error.response.data : error.message);
             return JSON.stringify({ error: "Error interno: " + error.message });
         }
     }
+    
     
     async getFuturesTradeHistory(account) {
         const credentials = this.getApiCredentials(account);

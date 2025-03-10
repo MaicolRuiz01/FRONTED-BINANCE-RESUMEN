@@ -8,10 +8,10 @@ router.use(cors({
     origin: 'http://127.0.0.1:5501' // Ajusta esto según sea necesario
 }));
 
-router.get('/orders', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const account = req.query.account;
-        const result = await binanceService.getP2POrders(account);
+        const result = await binanceService.getPaymentHistory(account);
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
