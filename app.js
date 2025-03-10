@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+app.use(express.static('public'));
 
 // Controllers
 const p2pController = require('./components/p2pController');
@@ -16,7 +18,13 @@ app.use('/api/test', testController);
 app.use('/api/futures', futuresController);
 
 app.get('/', (req, res) => {
-  res.send('Hola Mundo con Express y Node.js!');
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+// Manejador de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Algo salió mal!');
 });
 
 app.listen(port, () => {

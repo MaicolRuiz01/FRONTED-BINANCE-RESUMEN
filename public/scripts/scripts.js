@@ -201,10 +201,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const account = urlParams.get('account');
 
-    if (window.location.pathname.includes('orders.html')) {
+    if (window.location.pathname.includes('../orders.html')) {
         // Lógica para órdenes P2P
         fetchP2POrders(account);
-    } else if (window.location.pathname.includes('futures.html')) {
+    } else if (window.location.pathname.includes('../futures.html')) {
         // Lógica para futuros
         const positionsTab = document.getElementById('positions-tab');
         const tradesTab = document.getElementById('trades-tab');
