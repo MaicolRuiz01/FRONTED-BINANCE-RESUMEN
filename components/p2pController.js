@@ -4,9 +4,10 @@ const cors = require('cors'); // Asegúrate de requerir CORS
 const binanceService = require('../service/binanceService');
 
 const allowedOrigins = [
-    'http://127.0.0.1:5501', // Local
+    // 'http://127.0.0.1:5501', // Local
     'https://maicolruiz01.github.io', // GitHub Pages
     'https://fronted-binance-resumen-production.up.railway.app', // Railway
+    "http://localhost:3000"
 ];
 
 router.use(cors({
