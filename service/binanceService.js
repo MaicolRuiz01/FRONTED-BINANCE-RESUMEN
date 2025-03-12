@@ -45,12 +45,12 @@ class BinanceService {
         if (!credentials) {
             return JSON.stringify({ error: "Cuenta no válida." });
         }
-
+    
         const timestamp = await this.getServerTime();
         const query = `timestamp=${timestamp}&recvWindow=60000`;
         const signature = this.createSignature(credentials.secretKey, query);
         const url = `${this.paymentsApiUrl}?${query}&signature=${signature}`;
-
+    
         try {
             const response = await this.sendBinanceRequest(url, credentials.apiKey);
             return response.data;

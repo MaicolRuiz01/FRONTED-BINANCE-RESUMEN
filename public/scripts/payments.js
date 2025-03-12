@@ -3,34 +3,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const account = urlParams.get('account');
 
-    // Cargar el historial de pagos automáticamente
+    // Cargar el historial de pagos automáticamente con la cuenta seleccionada
     fetchPaymentHistory(account);
 });
 
-// const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; // 🚀 Railway URL
-    const backendUrl = "http://localhost:3000"; 
+// const backendUrl = "https://backend-binance-resumen-production.up.railway.app"; //  Railway URL
+/* const backendUrl = "http://localhost:3000"; */
+const backendUrl = "https://fronted-binance-resumen-production.up.railway.app";
+
 async function fetchPaymentHistory(account) {
     try {
-        const response = await axios.get(`${backendUrl}/api/payments`, {
-            params: { account }
-        });
-
+        const response = await axios.get(`${backendUrl}/api/payments/history`, { params: { account } });
         console.log("Respuesta del backend:", response.data);
 
         if (response.data.error) {
             alert("Error: " + response.data.error);
-        } else if (response.data.data) {
-            displayPaymentHistory(response.data.data);
-        } else {
-            alert("Respuesta inesperada del backend.");
+            return;
         }
+
+        if (!response.data.data || !Array.isArray(response.data.data)) {
+            console.error("Formato inesperado:", response.data);
+            alert("No se encontraron datos válidos.");
+            return;
+        }
+
+        displayPaymentHistory(response.data.data);
     } catch (error) {
         console.error("Error al cargar el historial de pagos:", error);
         alert("No se pudo cargar el historial de pagos.");
     }
 }
-
-
 
 function displayPaymentHistory(data) {
     const historyTable = document.getElementById('paymentHistory');
